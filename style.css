@@ -1,0 +1,44 @@
+body {
+  background-color: #f8f9fa;
+}
+
+li {
+  list-style: none;
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.note-title {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.note-content {
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.note-actions {
+  display: flex;
+  gap: 10px;
+  font-size: 1.2rem;
+}
+
+.note-actions i {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.note-actions i:hover {
+  color: #0d6efd; /* bootstrap primary */
+}
+
+.hidden {
+  display: none;
+}
