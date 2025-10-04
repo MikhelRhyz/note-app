@@ -14,16 +14,16 @@ notesContainer.addEventListener("click", handleNoteActions);
 
 // --- Event Handlers ---
 function handleAddNote() {
-  if (!noteTitle.value.trim() && !noteContent.value.trim()) return; // prevent empty notes
+  if (!noteTitle.value.trim() && !noteContent.value.trim()) return;
 
   const newNote = { 
     title: noteTitle.value.trim(), 
     content: noteContent.value.trim() 
   };
 
-  renderNote(newNote);
   notes.push(newNote);
   saveNotes();
+  renderNotes();
 
   noteTitle.value = "";
   noteContent.value = "";
@@ -40,26 +40,25 @@ function handleNoteActions(e) {
     noteTitle.value = notes[index].title;
     noteContent.value = notes[index].content;
     notes.splice(index, 1);
-    li.remove();
   } 
   else if (e.target.classList.contains("fa-trash")) {
     // Delete note
     if (confirm("Delete this note?")) {
       notes.splice(index, 1);
-      li.remove();
     }
   }
 
   saveNotes();
+  renderNotes();
 }
 
 function searchNotes() {
   const query = searchInput.value.toLowerCase();
-  document.querySelectorAll(".note-title, .note-content").forEach(el => {
-    const li = el.closest("li");
-    const text = li.innerText.toLowerCase();
-    li.classList.toggle("hidden", !text.includes(query));
-  });
+  const filteredNotes = notes.filter(note => 
+    note.title.toLowerCase().includes(query) || 
+    note.content.toLowerCase().includes(query)
+  );
+  renderNotes(filteredNotes);
 }
 
 // --- Local Storage ---
@@ -69,40 +68,58 @@ function saveNotes() {
 
 function loadNotes() {
   notes = JSON.parse(localStorage.getItem("notes")) || [];
-  notes.forEach(renderNote);
+  renderNotes();
 }
 
 // --- Rendering ---
-function renderNote(note) {
-  const li = document.createElement("li");
+function renderNotes(list = notes) {
+  notesContainer.innerHTML = "";
 
-  const contentWrapper = document.createElement("div");
-  contentWrapper.className = "note-content-wrapper";
+  if (list.length === 0) {
+    notesContainer.innerHTML = "<p class='text-muted text-center'>No notes yet. Add one above 👆</p>";
+    return;
+  }
 
-  const title = document.createElement("div");
-  title.className = "note-title";
-  title.textContent = note.title;
+  list.forEach(note => {
+    const li = document.createElement("li");
 
-  const content = document.createElement("div");
-  content.className = "note-content";
-  content.textContent = note.content;
+    const contentWrapper = document.createElement("div");
+    contentWrapper.className = "note-content-wrapper";
 
-  const actions = document.createElement("div");
-  actions.className = "note-actions";
+    const title = document.createElement("div");
+    title.className = "note-title";
+    title.textContent = note.title;
 
-  const editBtn = document.createElement("i");
-  editBtn.className = "fa-solid fa-pen";
+    const content = document.createElement("div");
+    content.className = "note-content";
+    content.textContent = note.content.length > 100 
+      ? note.content.slice(0, 100) + "..." 
+      : note.content;
 
-  const deleteBtn = document.createElement("i");
-  deleteBtn.className = "fa-solid fa-trash";
+    const actions = document.createElement("div");
+    actions.className = "note-actions";
 
-  actions.appendChild(editBtn);
-  actions.appendChild(deleteBtn);
-  contentWrapper.appendChild(title);
-  contentWrapper.appendChild(content);
+    const editBtn = document.createElement("i");
+    editBtn.className = "fa-solid fa-pen";
 
-  li.appendChild(contentWrapper);
-  li.appendChild(actions);
+    const deleteBtn = document.createElement("i");
+    deleteBtn.className = "fa-solid fa-trash";
 
-  notesContainer.appendChild(li);
+    actions.appendChild(editBtn);
+    actions.appendChild(deleteBtn);
+    contentWrapper.appendChild(title);
+    contentWrapper.appendChild(content);
+
+    li.appendChild(contentWrapper);
+    li.appendChild(actions);
+
+    notesContainer.appendChild(li);
+  });
 }
+
+// --- Keyboard Shortcut ---
+noteContent.addEventListener("keydown", e => {
+  if (e.ctrlKey && e.key === "Enter") {
+    handleAddNote();
+  }
+});
